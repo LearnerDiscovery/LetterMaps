@@ -418,6 +418,33 @@ const LetterMaps = () => {
     }
   }, [currentUser, showLogin]);
 
+  // Add keyboard event listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't interfere if user is typing in the username input
+      if (showLogin) return;
+      
+      // Prevent default for game keys
+      if (['Enter', 'Backspace', ...Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ')].includes(e.key)) {
+        e.preventDefault();
+      }
+
+      if (e.key === 'Enter') {
+        handleKeyPress('ENTER');
+      } else if (e.key === 'Backspace') {
+        handleKeyPress('BACKSPACE');
+      } else {
+        const key = e.key.toUpperCase();
+        if (/^[A-Z]$/.test(key)) {
+          handleKeyPress(key);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentGuess, gameWon, gameLost, showLogin]);
+
   const selectNewWord = () => {
     const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
     setCurrentWord(randomWord);
