@@ -421,8 +421,8 @@ const LetterMaps = () => {
   // Add keyboard event listener
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't interfere if user is typing in the username input
-      if (showLogin) return;
+      // Don't interfere if user is typing in the username input or game is over
+      if (showLogin || gameWon || gameLost) return;
       
       // Prevent default for game keys
       if (['Enter', 'Backspace', ...Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ')].includes(e.key)) {
@@ -1066,13 +1066,13 @@ const LetterMaps = () => {
 
               {/* Show all previous guesses */}
               {guesses.length > 0 && (
-                <div className="mb-4 bg-white rounded-lg p-4">
-                  <p className="text-sm text-gray-600 mb-2 font-semibold text-center">Your Guesses:</p>
+                <div className="mb-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border-2 border-blue-300">
+                  <p className="text-base text-gray-800 mb-3 font-bold text-center">📝 Your Guesses ({guesses.length}):</p>
                   <div className="flex flex-col gap-2">
                     {guesses.map((guess, index) => (
-                      <div key={index} className="flex items-center justify-center gap-2">
-                        <span className="text-xs text-gray-500 font-bold w-8">#{index + 1}</span>
-                        <div className="flex gap-1">
+                      <div key={index} className="flex items-center justify-center gap-2 bg-white rounded-lg p-2">
+                        <span className="text-sm text-blue-600 font-bold w-10 text-center">#{index + 1}</span>
+                        <div className="flex gap-1 flex-wrap justify-center">
                           {Array.from({ length: guess.length }).map((_, i) => {
                             const letter = guess[i];
                             const wordBoundaries = getWordBoundaries();
@@ -1100,7 +1100,7 @@ const LetterMaps = () => {
                             return (
                               <div
                                 key={i}
-                                className={`w-8 h-8 flex items-center justify-center text-sm font-bold rounded border-2 ${bgColor} ${extraMargin}`}
+                                className={`w-9 h-9 flex items-center justify-center text-base font-bold rounded border-2 ${bgColor} ${extraMargin} shadow-sm`}
                               >
                                 {letter}
                               </div>
@@ -1140,21 +1140,23 @@ const LetterMaps = () => {
               )}
 
               {/* Definition automatically shown */}
-              <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 mb-4">
+              <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 mb-6">
                 <p className="text-sm font-semibold text-gray-700 mb-2 text-center">📖 Definition:</p>
                 <p className="text-gray-700 text-center">
                   <span className="font-bold">{currentWord.display || currentWord.word}:</span> {currentWord.definition}
                 </p>
               </div>
 
-              <div className="text-center">
+              {/* Prominent Next Word Button */}
+              <div className="text-center pt-4 border-t-2 border-gray-300">
+                <p className="text-sm text-gray-600 mb-3">Ready for the next challenge?</p>
                 <button
                   onClick={selectNewWord}
-                  className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-xl font-bold transition-colors text-lg shadow-lg"
+                  className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-10 py-5 rounded-2xl font-bold transition-all text-xl shadow-2xl hover:shadow-xl transform hover:scale-105 animate-pulse"
                   style={{ fontFamily: 'Comic Sans MS, cursive' }}
                 >
-                  <RotateCcw className="w-6 h-6" />
-                  Next Word
+                  <RotateCcw className="w-7 h-7" />
+                  Next Word →
                 </button>
               </div>
             </div>
