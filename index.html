@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LetterMaps - Interactive Geography Spelling Game">
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>LetterMaps - Geography Spelling Game</title>
+    
+    <!-- React and ReactDOM from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Mobile-friendly adjustments */
+        @media (max-width: 640px) {
+            body {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Lucide React icons as inline SVG components
+        const RotateCcw = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+        );
+
+        const HelpCircle = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" strokeWidth={2}></circle>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                <circle cx="12" cy="17" r="0.5" fill="currentColor"></circle>
+            </svg>
+        );
+
+        const Award = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="8" r="7" strokeWidth={2}></circle>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" strokeWidth={2}></polyline>
+            </svg>
+        );
+
+        const BookOpen = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+        );
+
+        const Clock = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" strokeWidth={2}></circle>
+                <polyline points="12 6 12 12 16 14" strokeWidth={2}></polyline>
+            </svg>
+        );
+
+        const Trophy = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+        );
+
+        const Lightbulb = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+        );
+
+        const User = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+        );
+
+        const LogOut = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+        );
+
+
+
+
+const LetterMaps = () => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showLogin, setShowLogin] = useState(true);
+  const [username, setUsername] = useState('');
+  const [loginError, setLoginError] = useState('');
+  
+  const [currentWord, setCurrentWord] = useState(null);
+  const [guesses, setGuesses] = useState([]);
+  const [currentGuess, setCurrentGuess] = useState('');
+  const [gameWon, setGameWon] = useState(false);
+  const [gameLost, setGameLost] = useState(false);
+  const [usedLetters, setUsedLetters] = useState({});
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [showDefinition, setShowDefinition] = useState(false);
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
+  const [definitionViewedThisGame, setDefinitionViewedThisGame] = useState(false);
+  const [lastActionWasDefinition, setLastActionWasDefinition] = useState(false);
+  const [revealedWords, setRevealedWords] = useState([]);
+  const [helpUsedThisGame, setHelpUsedThisGame] = useState(false);
+
+  // All the geography terms with definitions
+  const wordList = [
+    { word: "HYDROLOGICALCYCLE", display: "HYDROLOGICAL CYCLE", definition: "The continuous movement of water between the atmosphere, land, and oceans through evaporation, condensation, precipitation, and runoff.", topic: "Water & Security" },
+    { word: "CRYOSPHERE", definition: "All locations on Earth where water is found in solid form, including snow, sea ice, glaciers, permafrost, ice sheets and icebergs.", topic: "Water & Security" },
+    { word: "RESIDENCETIME", display: "RESIDENCE TIME", definition: "The average time water remains in a particular store before moving to another part of the cycle.", topic: "Water & Security" },
+    { word: "FLUX", definition: "The rate of flow of water between stores in the hydrological cycle.", topic: "Water & Security" },
+    { word: "DRAINAGEBASIN", display: "DRAINAGE BASIN", definition: "An area of land drained by a river and its tributaries; an open system with inputs, outputs, stores and flows.", topic: "Water & Security" },
+    { word: "INTERCEPTION", definition: "The process by which precipitation is captured and stored by vegetation before reaching the ground.", topic: "Water & Security" },
+    { word: "INFILTRATION", definition: "The process by which water soaks into the soil from the ground surface.", topic: "Water & Security" },
+    { word: "THROUGHFLOW", definition: "The lateral movement of water through soil towards a river channel.", topic: "Water & Security" },
+    { word: "GROUNDWATERFLOW", display: "GROUNDWATER FLOW", definition: "The slow movement of water through permeable rocks towards rivers or oceans.", topic: "Water & Security" },
+    { word: "EVAPOTRANSPIRATION", definition: "Combined loss of water to the atmosphere via evaporation from surfaces and transpiration from plants.", topic: "Water & Security" },
+    { word: "WATERBUDGET", display: "WATER BUDGET", definition: "The balance between inputs (precipitation) and outputs (evapotranspiration and runoff) in a drainage basin over time.", topic: "Water & Security" },
+    { word: "STORMHYDROGRAPH", display: "STORM HYDROGRAPH", definition: "A graph showing river discharge over time in response to a precipitation event.", topic: "Water & Security" },
+    { word: "LAGTIME", display: "LAG TIME", definition: "The time delay between peak rainfall and peak discharge in a river.", topic: "Water & Security" },
+    { word: "PEAKDISCHARGE", display: "PEAK DISCHARGE", definition: "The maximum volume of water flowing through a river channel at a given point during a flood event.", topic: "Water & Security" },
+    { word: "WATERSTRESS", display: "WATER STRESS", definition: "When the demand for water exceeds the available amount during a certain period, or when poor quality restricts use (less than 1700m³ per person per year).", topic: "Water & Security" },
+    { word: "WATERSCARCITY", display: "WATER SCARCITY", definition: "When water availability falls below 1000m³ per person per year, threatening food production, economic development and human health.", topic: "Water & Security" },
+    { word: "PHYSICALWATERSCARCITY", display: "PHYSICAL WATER SCARCITY", definition: "Insufficient water resources to meet demand, typically in arid regions with low precipitation.", topic: "Water & Security" },
+    { word: "ECONOMICWATERSCARCITY", display: "ECONOMIC WATER SCARCITY", definition: "Lack of investment in water infrastructure prevents access to available water resources.", topic: "Water & Security" },
+    { word: "OVERABSTRACTION", display: "OVER ABSTRACTION", definition: "Removing water from rivers, lakes or aquifers at a rate faster than natural replenishment.", topic: "Water & Security" },
+    { word: "AQUIFER", definition: "An underground layer of permeable rock or sediment that stores and transmits groundwater.", topic: "Water & Security" },
+    { word: "DESALINATION", definition: "The process of removing salt and minerals from seawater to produce freshwater for human use.", topic: "Water & Security" },
+    { word: "TRANSBOUNDARYWATER", display: "TRANS BOUNDARY WATER", definition: "Water resources (rivers, lakes, aquifers) that cross or form international borders, requiring cooperation between nations.", topic: "Water & Security" },
+    { word: "WATERINSECURITY", display: "WATER INSECURITY", definition: "The inability to access sufficient safe water for daily needs, hygiene, and livelihoods.", topic: "Water & Security" },
+    { word: "DROUGHT", definition: "An extended period of abnormally low rainfall leading to water shortage.", topic: "Water & Security" },
+    { word: "FLOOD", definition: "An overflow of water that submerges normally dry land, often caused by intense rainfall, snowmelt, or storm surges.", topic: "Water & Security" },
+    { word: "ENSO", definition: "El Niño-Southern Oscillation; a periodic variation in Pacific Ocean temperatures affecting global weather patterns and water availability.", topic: "Water & Security" },
+    { word: "OROGRAPHICRAINFALL", display: "OROGRAPHIC RAINFALL", definition: "Precipitation caused when moist air is forced to rise over mountains, cooling and condensing.", topic: "Water & Security" },
+    { word: "SATURATEDOVERLANDFLOW", display: "SATURATED OVERLAND FLOW", definition: "Surface runoff that occurs when soil becomes saturated and can no longer absorb water.", topic: "Water & Security" },
+    { word: "HARDENGINEERING", display: "HARD ENGINEERING", definition: "Use of concrete structures like dams, levees, and flood barriers to control water.", topic: "Water & Security" },
+    { word: "SOFTENGINEERING", display: "SOFT ENGINEERING", definition: "Natural approaches to water management including wetland restoration, afforestation, and floodplain management.", topic: "Water & Security" },
+    { word: "CARBONCYCLE", display: "CARBON CYCLE", definition: "The biogeochemical cycle by which carbon moves between the atmosphere, oceans, terrestrial biosphere, and lithosphere.", topic: "Carbon & Energy" },
+    { word: "CARBONSINK", display: "CARBON SINK", definition: "A natural or artificial reservoir that accumulates and stores carbon-containing compounds, removing CO₂ from the atmosphere.", topic: "Carbon & Energy" },
+    { word: "CARBONSOURCE", display: "CARBON SOURCE", definition: "Any process or location that releases more carbon to the atmosphere than it absorbs.", topic: "Carbon & Energy" },
+    { word: "FLUX", definition: "The rate of transfer of carbon between stores in the carbon cycle.", topic: "Carbon & Energy" },
+    { word: "PHOTOSYNTHESIS", definition: "Process by which plants absorb CO₂ and use sunlight to convert it into organic compounds, releasing oxygen.", topic: "Carbon & Energy" },
+    { word: "RESPIRATION", definition: "Process by which organisms break down organic compounds, releasing energy and returning CO₂ to the atmosphere.", topic: "Carbon & Energy" },
+    { word: "SEQUESTRATION", definition: "Long-term storage of carbon in plants, soils, oceans, or geological formations to mitigate climate change.", topic: "Carbon & Energy" },
+    { word: "FOSSILFUELS", display: "FOSSIL FUELS", definition: "Carbon-rich deposits (coal, oil, natural gas) formed from ancient organic matter over millions of years.", topic: "Carbon & Energy" },
+    { word: "GREENHOUSEEFFECT", display: "GREENHOUSE EFFECT", definition: "The warming of Earth's surface caused by atmospheric gases trapping outgoing longwave radiation.", topic: "Carbon & Energy" },
+    { word: "GREENHOUSEGASES", display: "GREENHOUSE GASES", definition: "Atmospheric gases (CO₂, CH₄, N₂O, water vapor) that absorb and emit infrared radiation, causing warming.", topic: "Carbon & Energy" },
+    { word: "ENHANCEDGREENHOUSEEFFECT", display: "ENHANCED GREENHOUSE EFFECT", definition: "Additional warming caused by increased atmospheric greenhouse gas concentrations from human activities.", topic: "Carbon & Energy" },
+    { word: "OCEANACIDIFICATION", display: "OCEAN ACIDIFICATION", definition: "Decreasing pH of ocean water caused by absorption of excess atmospheric CO₂, harming marine ecosystems.", topic: "Carbon & Energy" },
+    { word: "THERMOHALINECIRCULATION", display: "THERMOHALINE CIRCULATION", definition: "Global ocean current system driven by temperature and salinity differences, redistributing heat and carbon.", topic: "Carbon & Energy" },
+    { word: "CARBONFOOTPRINT", display: "CARBON FOOTPRINT", definition: "Total greenhouse gas emissions caused directly and indirectly by an individual, organization, event, or product.", topic: "Carbon & Energy" },
+    { word: "DECARBONISATION", definition: "The process of reducing carbon dioxide emissions from energy production and industrial processes.", topic: "Carbon & Energy" },
+    { word: "ENERGYSECURITY", display: "ENERGY SECURITY", definition: "Reliable availability of energy sources at affordable prices to meet demand without disruption.", topic: "Carbon & Energy" },
+    { word: "ENERGYMIX", display: "ENERGY MIX", definition: "The combination of different energy sources (fossil fuels, nuclear, renewables) used by a country or region.", topic: "Carbon & Energy" },
+    { word: "RENEWABLEENERGY", display: "RENEWABLE ENERGY", definition: "Energy from sources that naturally replenish (solar, wind, hydro, geothermal, biomass).", topic: "Carbon & Energy" },
+    { word: "FRACKING", definition: "Hydraulic fracturing; extracting oil or gas by injecting high-pressure fluid into underground shale rock.", topic: "Carbon & Energy" },
+    { word: "CARBONCAPTUREANDSTORAGE", display: "CARBON CAPTURE AND STORAGE", definition: "Technology capturing CO₂ emissions from power plants or industrial facilities and storing underground.", topic: "Carbon & Energy" },
+    { word: "NETZERO", display: "NET ZERO", definition: "Achieving balance between greenhouse gas emissions produced and removed from the atmosphere.", topic: "Carbon & Energy" },
+    { word: "FOSSILFUELCOMBUSTION", display: "FOSSIL FUEL COMBUSTION", definition: "Burning of coal, oil, or gas to release energy, producing CO₂ and other greenhouse gases.", topic: "Carbon & Energy" },
+    { word: "DEFORESTATION", definition: "Permanent removal of forests, releasing stored carbon and eliminating a carbon sink.", topic: "Carbon & Energy" },
+    { word: "FEEDBACKLOOP", display: "FEEDBACK LOOP", definition: "A process where the output of a system affects its own input, either amplifying (positive) or dampening (negative) change.", topic: "Carbon & Energy" },
+    { word: "TIPPINGPOINT", display: "TIPPING POINT", definition: "A critical threshold beyond which a small change triggers a large, often irreversible, system transformation.", topic: "Carbon & Energy" },
+    { word: "PERMAFROST", definition: "Permanently frozen ground in polar regions that stores vast amounts of carbon as frozen organic matter.", topic: "Carbon & Energy" },
+    { word: "PEATLAND", definition: "Wetland ecosystem where decomposed organic matter accumulates as peat, storing significant carbon.", topic: "Carbon & Energy" },
+    { word: "UNCONVENTIONALFOSSILFUELS", display: "UNCONVENTIONAL FOSSIL FUELS", definition: "Harder-to-extract fossil fuels including shale gas, tar sands, and deep-water oil requiring advanced technology.", topic: "Carbon & Energy" },
+    { word: "ENERGYTRANSITION", display: "ENERGY TRANSITION", definition: "The global shift from fossil fuel-based energy systems to renewable and low-carbon alternatives.", topic: "Carbon & Energy" },
+    { word: "CARBONINTENSITY", display: "CARBON INTENSITY", definition: "Amount of CO₂ emissions per unit of economic output or energy produced.", topic: "Carbon & Energy" },
+    { word: "HUMANDEVELOPMENT", display: "HUMAN DEVELOPMENT", definition: "Process of expanding people's freedoms and opportunities to live lives they value, beyond just economic growth.", topic: "Health & Rights" },
+    { word: "GDPPERCAPITA", display: "GDP PER CAPITA", definition: "Gross Domestic Product divided by population; measures average economic output per person.", topic: "Health & Rights" },
+    { word: "HUMANDEVELOPMENTINDEX", display: "HUMAN DEVELOPMENT INDEX", definition: "Composite measure combining life expectancy, education, and income to assess overall human development.", topic: "Health & Rights" },
+    { word: "HAPPYPLANETINDEX", display: "HAPPY PLANET INDEX", definition: "Measure of sustainable wellbeing combining life expectancy, wellbeing, inequality, and ecological footprint.", topic: "Health & Rights" },
+    { word: "LIFEEXPECTANCY", display: "LIFE EXPECTANCY", definition: "Average number of years a person is expected to live from birth.", topic: "Health & Rights" },
+    { word: "INFANTMORTALITYRATE", display: "INFANT MORTALITY RATE", definition: "Number of deaths of infants under one year old per 1,000 live births.", topic: "Health & Rights" },
+    { word: "MATERNALMORTALITYRATE", display: "MATERNAL MORTALITY RATE", definition: "Number of women who die during pregnancy or childbirth per 100,000 live births.", topic: "Health & Rights" },
+    { word: "HUMANRIGHTS", display: "HUMAN RIGHTS", definition: "Basic rights and freedoms inherent to all humans, including civil, political, economic, social, and cultural rights.", topic: "Health & Rights" },
+    { word: "UNIVERSALDECLARATIONOFHUMANRIGHTS", display: "UNIVERSAL DECLARATION OF HUMAN RIGHTS", definition: "1948 UN document setting out fundamental human rights to be universally protected.", topic: "Health & Rights" },
+    { word: "GEOPOLITICALINTERVENTION", display: "GEOPOLITICAL INTERVENTION", definition: "Actions taken by states or international organizations to influence events in other countries, from aid to military force.", topic: "Health & Rights" },
+    { word: "DEVELOPMENTAID", display: "DEVELOPMENT AID", definition: "Financial or technical assistance given to support economic, environmental, and social development in recipient countries.", topic: "Health & Rights" },
+    { word: "BILATERALAID", display: "BILATERAL AID", definition: "Development assistance given directly from one government to another.", topic: "Health & Rights" },
+    { word: "MULTILATERALAID", display: "MULTILATERAL AID", definition: "Development assistance channeled through international organizations like UN, World Bank, or IMF.", topic: "Health & Rights" },
+    { word: "STRUCTURALADJUSTMENTPROGRAM", display: "STRUCTURAL ADJUSTMENT PROGRAM", definition: "Economic policies imposed by IMF/World Bank requiring free market reforms, privatization, and reduced government spending in exchange for loans.", topic: "Health & Rights" },
+    { word: "NEOLIBERALISM", definition: "Economic ideology favoring free markets, privatization, deregulation, and reduced government intervention.", topic: "Health & Rights" },
+    { word: "IGO", definition: "Intergovernmental Organization; association of states established by treaty (e.g. UN, IMF, World Bank, WTO).", topic: "Health & Rights" },
+    { word: "IMF", definition: "International Monetary Fund; IGO providing loans to countries facing balance of payments problems, often with policy conditions.", topic: "Health & Rights" },
+    { word: "WORLDBANK", display: "WORLD BANK", definition: "International financial institution providing loans and grants to governments for development projects.", topic: "Health & Rights" },
+    { word: "NGO", definition: "Non-Governmental Organization; independent organization not controlled by governments, often working on humanitarian or development issues.", topic: "Health & Rights" },
+    { word: "MILITARYINTERVENTION", display: "MILITARY INTERVENTION", definition: "Use of armed forces by one or more countries in another country's territory.", topic: "Health & Rights" },
+    { word: "HUMANITARIANINTERVENTION", display: "HUMANITARIAN INTERVENTION", definition: "Military intervention justified by need to prevent or stop human rights abuses or humanitarian disasters.", topic: "Health & Rights" },
+    { word: "RESPONSIBILITYTOPROTECT", display: "RESPONSIBILITY TO PROTECT", definition: "International principle that sovereignty entails responsibility to protect populations; if a state fails, international community may intervene.", topic: "Health & Rights" },
+    { word: "ECONOMICSANCTIONS", display: "ECONOMIC SANCTIONS", definition: "Restrictions on trade or financial transactions imposed to pressure a country to change policies.", topic: "Health & Rights" },
+    { word: "NATIONALSOVEREIGNTY", display: "NATIONAL SOVEREIGNTY", definition: "A state's supreme authority to govern itself without external interference.", topic: "Health & Rights" },
+    { word: "DEBTTRAPDIPLOMACY", display: "DEBT TRAP DIPLOMACY", definition: "Lending strategy that deliberately creates unsustainable debt to extract economic or political concessions.", topic: "Health & Rights" },
+    { word: "STRUCTURALVIOLENCE", display: "STRUCTURAL VIOLENCE", definition: "Harm caused by social structures or institutions that prevent people from meeting basic needs.", topic: "Health & Rights" },
+    { word: "GENDERINEQUALITY", display: "GENDER INEQUALITY", definition: "Unequal treatment or perception of individuals based on gender, often measured by economic participation, education, health, and political power.", topic: "Health & Rights" },
+    { word: "COLONIALLEGACY", display: "COLONIAL LEGACY", definition: "Long-lasting impacts of colonialism on former colonies' political, economic, social structures and development trajectories.", topic: "Health & Rights" },
+    { word: "MILLENNIUMDEVELOPMENTGOALS", display: "MILLENNIUM DEVELOPMENT GOALS", definition: "Eight international development goals established in 2000 for achievement by 2015.", topic: "Health & Rights" },
+    { word: "SUSTAINABLEDEVELOPMENTGOALS", display: "SUSTAINABLE DEVELOPMENT GOALS", definition: "17 global goals adopted by UN in 2015 as blueprint for peace and prosperity by 2030.", topic: "Health & Rights" },
+    { word: "GLOBALISATION", definition: "The process of increasing interconnection and interdependence between countries through flows of goods, services, capital, people, and information.", topic: "Globalisation" },
+    { word: "FOREIGNDIRECTINVESTMENT", display: "FOREIGN DIRECT INVESTMENT", definition: "Investment made by a company or individual in one country into business interests in another country, usually involving ownership or control.", topic: "Globalisation" },
+    { word: "TRANSNATIONALCORPORATION", display: "TRANSNATIONAL CORPORATION", definition: "A company that operates in multiple countries, with production facilities, offices, and markets across national borders.", topic: "Globalisation" },
+    { word: "TIMESPACECOMPRESSION", display: "TIME SPACE COMPRESSION", definition: "The phenomenon whereby innovations in transport and communications make places feel closer together and reduce the friction of distance.", topic: "Globalisation" },
+    { word: "INTERDEPENDENCE", definition: "Mutual reliance between countries or regions, where each depends on others for goods, services, or resources.", topic: "Globalisation" },
+    { word: "FREETRADE", display: "FREE TRADE", definition: "International trade without government restrictions like tariffs, quotas, or subsidies that limit imports or favor domestic producers.", topic: "Globalisation" },
+    { word: "TRADEBLOC", display: "TRADE BLOC", definition: "Group of countries that agree to reduce or eliminate trade barriers between members while often maintaining barriers with non-members.", topic: "Globalisation" },
+    { word: "SPECIALECONOMICZONE", display: "SPECIAL ECONOMIC ZONE", definition: "Designated area within a country offering tax breaks, reduced regulations, and improved infrastructure to attract foreign investment.", topic: "Globalisation" },
+    { word: "GLOBALPRODUCTIONNETWORK", display: "GLOBAL PRODUCTION NETWORK", definition: "Worldwide system where different stages of production are located in different countries to optimize costs and efficiency.", topic: "Globalisation" },
+    { word: "GLOCALISATION", definition: "Adaptation of global products or practices to local markets, cultures, or preferences, blending global and local characteristics.", topic: "Globalisation" },
+    { word: "OUTSOURCING", definition: "Contracting business functions or processes to external providers, often in other countries, to reduce costs.", topic: "Globalisation" },
+    { word: "OFFSHORING", definition: "Relocating business processes or production to another country, typically to benefit from lower labor costs or favorable conditions.", topic: "Globalisation" },
+    { word: "GLOBALSHIFT", display: "GLOBAL SHIFT", definition: "The relocation of manufacturing industries from developed to developing countries, particularly Asia, since the 1960s.", topic: "Globalisation" },
+    { word: "DEINDUSTRIALISATION", definition: "Decline in manufacturing industry in a region or country, often involving factory closures and job losses.", topic: "Globalisation" },
+    { word: "ECONOMICRESTRUCTURING", display: "ECONOMIC RESTRUCTURING", definition: "Process of changing economic base from one sector (e.g. manufacturing) to another (e.g. services) or modernizing industries.", topic: "Globalisation" },
+    { word: "RURALURBANMIGRATION", display: "RURAL URBAN MIGRATION", definition: "Movement of people from countryside to cities, driven by push factors (poverty, lack of opportunities) and pull factors (jobs, services).", topic: "Globalisation" },
+    { word: "MEGACITY", definition: "Urban area with population exceeding 10 million people.", topic: "Globalisation" },
+    { word: "ECONOMICMIGRATION", display: "ECONOMIC MIGRATION", definition: "Movement of people primarily for employment opportunities and improved economic prospects.", topic: "Globalisation" },
+    { word: "GLOBALHUBCITY", display: "GLOBAL HUB CITY", definition: "City with disproportionate influence on global economy, politics, or culture, serving as node in worldwide networks.", topic: "Globalisation" },
+    { word: "CULTURALDIFFUSION", display: "CULTURAL DIFFUSION", definition: "Spread of cultural beliefs, practices, items, or ideas from one society to others through various forms of contact.", topic: "Globalisation" },
+    { word: "CULTURALEROSION", display: "CULTURAL EROSION", definition: "Loss or weakening of traditional cultural practices, languages, or identities due to globalization or dominant culture influence.", topic: "Globalisation" },
+    { word: "WESTERNISATION", definition: "Adoption of Western European and North American culture, values, technology, and economic systems by other societies.", topic: "Globalisation" },
+    { word: "HDI", definition: "Human Development Index; composite measure of life expectancy, education, and income used to rank countries by level of human development.", topic: "Globalisation" },
+    { word: "GII", definition: "Gender Inequality Index; measures disadvantages in reproductive health, empowerment, and economic activity between genders.", topic: "Globalisation" },
+    { word: "GINICOEFFICIENT", display: "GINI COEFFICIENT", definition: "Statistical measure of income or wealth inequality within population, ranging from 0 (perfect equality) to 1 (perfect inequality).", topic: "Globalisation" },
+    { word: "PROTECTIONISM", definition: "Government policies restricting international trade to protect domestic industries from foreign competition.", topic: "Globalisation" },
+    { word: "FAIRTRADE", display: "FAIR TRADE", definition: "Trading partnership seeking greater equity in international trade through better prices, working conditions, and terms for producers in developing countries.", topic: "Globalisation" },
+    { word: "ETHICALCONSUMPTION", display: "ETHICAL CONSUMPTION", definition: "Purchasing decisions based on moral concerns about production methods, environmental impact, or social justice.", topic: "Globalisation" },
+    { word: "LOCALISM", definition: "Social movement favoring local production and consumption to reduce environmental impact and support community.", topic: "Globalisation" },
+    { word: "ECOLOGICALFOOTPRINT", display: "ECOLOGICAL FOOTPRINT", definition: "Measure of human demand on Earth's ecosystems, expressed as land area required to sustain resource consumption and waste absorption.", topic: "Globalisation" },
+    { word: "SUPERPOWER", definition: "A nation with the capacity to project dominating power and influence globally through economic, military, political, and cultural means.", topic: "Superpowers" },
+    { word: "EMERGINGPOWER", display: "EMERGING POWER", definition: "A nation experiencing rapid economic growth and increasing global influence, potentially challenging existing superpowers.", topic: "Superpowers" },
+    { word: "REGIONALPOWER", display: "REGIONAL POWER", definition: "A nation with significant influence within a specific geographic region but limited global reach.", topic: "Superpowers" },
+    { word: "HARDPOWER", display: "HARD POWER", definition: "Coercive power achieved through military force, economic sanctions, or other forms of intimidation.", topic: "Superpowers" },
+    { word: "SOFTPOWER", display: "SOFT POWER", definition: "Power of attraction and persuasion through culture, values, policies, and institutions that make others want to follow.", topic: "Superpowers" },
+    { word: "GEOPOLITICS", definition: "Study of how geography affects politics and international relations, including competition for territory and resources.", topic: "Superpowers" },
+    { word: "GEOSTRATEGY", definition: "Application of geographic factors to a nation's political and military strategy.", topic: "Superpowers" },
+    { word: "SPHEREOFINFLUENCE", display: "SPHERE OF INFLUENCE", definition: "Geographic area over which a state or organization exerts significant cultural, economic, military, or political influence.", topic: "Superpowers" },
+    { word: "HEGEMONY", definition: "Dominance or leadership of one nation or group over others, especially in political or cultural contexts.", topic: "Superpowers" },
+    { word: "UNIPOLARWORLD", display: "UNIPOLAR WORLD", definition: "International system dominated by a single superpower with unmatched global influence.", topic: "Superpowers" },
+    { word: "BIPOLARWORLD", display: "BIPOLAR WORLD", definition: "International system dominated by two competing superpowers with other nations aligned to one or the other.", topic: "Superpowers" },
+    { word: "MULTIPOLARWORLD", display: "MULTIPOLAR WORLD", definition: "International system with multiple competing powers and no single dominant state.", topic: "Superpowers" },
+    { word: "NEOCOLONIALISM", display: "NEO COLONIALISM", definition: "Indirect control of developing countries by developed nations through economic, political, or cultural influence rather than direct rule.", topic: "Superpowers" },
+    { word: "BRICBRICS", definition: "Brazil, Russia, India, China (South Africa) - emerging economies identified as having significant growth potential and influence.", topic: "Superpowers" },
+    { word: "G20", definition: "Group of 20 major economies meeting to coordinate global economic policy, representing both developed and emerging nations.", topic: "Superpowers" },
+    { word: "WORLDSYSTEMSTHEORY", display: "WORLD SYSTEMS THEORY", definition: "Theory dividing world into core (developed), periphery (exploited), and semi-periphery (intermediate) regions with unequal relationships.", topic: "Superpowers" },
+    { word: "DEPENDENCYTHEORY", display: "DEPENDENCY THEORY", definition: "Theory arguing that developed nations exploit and maintain dependence of developing nations through unequal trade and economic relationships.", topic: "Superpowers" },
+    { word: "MODERNISATIONTHEORY", display: "MODERNISATION THEORY", definition: "Theory proposing all countries follow similar development path from traditional to modern societies, with Western model as goal.", topic: "Superpowers" },
+    { word: "IGO", definition: "Intergovernmental Organization; institution created by treaty between sovereign states (UN, IMF, WTO, NATO).", topic: "Superpowers" },
+    { word: "WTO", definition: "World Trade Organization; IGO regulating international trade, promoting free trade, and resolving trade disputes.", topic: "Superpowers" },
+    { word: "IMF", definition: "International Monetary Fund; IGO providing loans and monitoring global economic stability.", topic: "Superpowers" },
+    { word: "WORLDBANK", display: "WORLD BANK", definition: "International financial institution providing loans for development projects in middle and low-income countries.", topic: "Superpowers" },
+    { word: "NATO", definition: "North Atlantic Treaty Organization; military alliance of North American and European nations for collective defense.", topic: "Superpowers" },
+    { word: "PATENT", definition: "Exclusive right granted for an invention, giving owner control over use and preventing others from making, using, or selling it.", topic: "Superpowers" },
+    { word: "WESTERNISATION", definition: "Process of adopting Western culture, values, technology, and economic systems, often associated with modernization.", topic: "Superpowers" },
+    { word: "BELTANDROADINITIATIVE", display: "BELT AND ROAD INITIATIVE", definition: "Chinese infrastructure and investment project creating land and maritime trade routes connecting Asia, Europe, and Africa.", topic: "Superpowers" },
+    { word: "COUNTERFEITING", definition: "Illegal copying or imitation of products, violating intellectual property rights and harming legitimate businesses.", topic: "Superpowers" },
+    { word: "CARBONEMISSIONS", display: "CARBON EMISSIONS", definition: "Release of carbon dioxide and other greenhouse gases into atmosphere, primarily from burning fossil fuels.", topic: "Superpowers" },
+    { word: "INTELLECTUALPROPERTY", display: "INTELLECTUAL PROPERTY", definition: "Creations of the mind (inventions, designs, brands, artistic works) protected by patents, trademarks, and copyrights.", topic: "Superpowers" },
+    { word: "TERRITORIALDISPUTE", display: "TERRITORIAL DISPUTE", definition: "Disagreement between states, organizations, or groups over possession or control of land, maritime, or air territory.", topic: "Superpowers" },
+  ];
+
+  const maxGuesses = 6;
+
+  // Get colors based on topic
+  const getTopicColors = (topic) => {
+    switch(topic) {
+      case "Tectonics & Hazards":
+        return {
+          gradient: "from-red-50 via-orange-100 to-red-100",
+          badge: "bg-red-500 text-white",
+          primary: "red"
+        };
+      case "Globalisation":
+        return {
+          gradient: "from-purple-50 via-indigo-100 to-purple-100",
+          badge: "bg-purple-500 text-white",
+          primary: "purple"
+        };
+      case "Superpowers":
+        return {
+          gradient: "from-blue-50 via-blue-100 to-indigo-100",
+          badge: "bg-blue-600 text-white",
+          primary: "blue"
+        };
+      case "Carbon & Energy":
+        return {
+          gradient: "from-green-50 via-emerald-100 to-green-100",
+          badge: "bg-green-600 text-white",
+          primary: "green"
+        };
+      case "Water & Security":
+        return {
+          gradient: "from-cyan-50 via-teal-100 to-cyan-100",
+          badge: "bg-cyan-600 text-white",
+          primary: "cyan"
+        };
+      case "Health & Rights":
+        return {
+          gradient: "from-pink-50 via-rose-100 to-pink-100",
+          badge: "bg-pink-600 text-white",
+          primary: "pink"
+        };
+      default:
+        return {
+          gradient: "from-blue-50 via-blue-100 to-indigo-100",
+          badge: "bg-blue-500 text-white",
+          primary: "blue"
+        };
+    }
+  };
+
+  // Load current user from localStorage on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('lettermaps_current_user');
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+      setShowLogin(false);
+    }
+  }, []);
+
+  // Load user data or create new
+  const loadUserData = (username) => {
+    const allUsers = JSON.parse(localStorage.getItem('lettermaps_users') || '{}');
+    return allUsers[username] || {
+      username,
+      gamesPlayed: 0,
+      gamesWon: 0,
+      totalTime: 0,
+      averageTime: 0,
+      bestTime: null,
+      speeds: [],
+      definitionUsedBeforeWin: 0,
+      wonImmediatelyAfterDefinition: 0
+    };
+  };
+
+  const saveUserData = (userData) => {
+    const allUsers = JSON.parse(localStorage.getItem('lettermaps_users') || '{}');
+    allUsers[userData.username] = userData;
+    localStorage.setItem('lettermaps_users', JSON.stringify(allUsers));
+  };
+
+  const handleLogin = () => {
+    if (!username.trim()) {
+      setLoginError('Please enter a username');
+      return;
+    }
+
+    if (username.length < 3) {
+      setLoginError('Username must be at least 3 characters');
+      return;
+    }
+
+    const allUsers = JSON.parse(localStorage.getItem('lettermaps_users') || '{}');
+    
+    // Check if username exists
+    if (allUsers[username]) {
+      // Load existing user
+      const userData = loadUserData(username);
+      setCurrentUser(userData);
+      localStorage.setItem('lettermaps_current_user', JSON.stringify(userData));
+      setShowLogin(false);
+      setLoginError('');
+    } else {
+      // Create new user
+      const newUser = {
+        username,
+        gamesPlayed: 0,
+        gamesWon: 0,
+        totalTime: 0,
+        averageTime: 0,
+        bestTime: null,
+        speeds: [],
+        definitionUsedBeforeWin: 0,
+        wonImmediatelyAfterDefinition: 0
+      };
+      allUsers[username] = newUser;
+      localStorage.setItem('lettermaps_users', JSON.stringify(allUsers));
+      localStorage.setItem('lettermaps_current_user', JSON.stringify(newUser));
+      setCurrentUser(newUser);
+      setShowLogin(false);
+      setLoginError('');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('lettermaps_current_user');
+    setCurrentUser(null);
+    setShowLogin(true);
+    setCurrentWord(null);
+  };
+
+  useEffect(() => {
+    if (currentUser && !showLogin) {
+      selectNewWord();
+    }
+  }, [currentUser, showLogin]);
+
+  const selectNewWord = () => {
+    const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
+    setCurrentWord(randomWord);
+    setGuesses([]);
+    setCurrentGuess('');
+    setGameWon(false);
+    setGameLost(false);
+    setUsedLetters({});
+    setStartTime(Date.now());
+    setEndTime(null);
+    setShowDefinition(false);
+    setDefinitionViewedThisGame(false);
+    setLastActionWasDefinition(false);
+    setHelpUsedThisGame(false);
+    
+    // Check if we should auto-reveal a word
+    // This happens when there are multiple words AND at least one word is longer than 6 letters
+    const shouldAutoReveal = randomWord.display && 
+                             randomWord.display.split(' ').length > 1 &&
+                             randomWord.display.split(' ').some(word => word.replace(/[^A-Z]/g, '').length > 6);
+    
+    if (shouldAutoReveal) {
+      // Reveal the first word automatically
+      setRevealedWords([0]);
+    } else {
+      setRevealedWords([]);
+    }
+  };
+
+  const formatTime = (ms) => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return minutes > 0 ? `${minutes}m ${remainingSeconds}s` : `${seconds}s`;
+  };
+
+  // Get word boundaries for multi-word terms
+  const getWordBoundaries = () => {
+    if (!currentWord.display) return [];
+    const words = currentWord.display.split(' ');
+    const boundaries = [];
+    let position = 0;
+    for (let i = 0; i < words.length - 1; i++) {
+      position += words[i].replace(/[^A-Z]/g, '').length;
+      boundaries.push(position);
+    }
+    return boundaries;
+  };
+
+  // Count number of words in the answer
+  const getWordCount = () => {
+    if (!currentWord.display) return 1;
+    return currentWord.display.split(' ').length;
+  };
+
+  // Get individual words from the answer
+  const getWords = () => {
+    if (!currentWord.display) return [currentWord.word];
+    return currentWord.display.split(' ').map(word => word.replace(/[^A-Z]/g, ''));
+  };
+
+  // Check if answer should have a word pre-filled
+  const shouldAutoRevealWord = () => {
+    if (!currentWord.display) return false;
+    const words = getWords();
+    if (words.length <= 1) return false;
+    // Check if any word is longer than 6 letters
+    return words.some(word => word.length > 6);
+  };
+
+  // Get the positions where each word starts in the full answer
+  const getWordPositions = () => {
+    if (!currentWord.display) return [{ start: 0, end: currentWord.word.length - 1, word: currentWord.word }];
+    const words = getWords();
+    const positions = [];
+    let currentPos = 0;
+    words.forEach((word, index) => {
+      positions.push({
+        start: currentPos,
+        end: currentPos + word.length - 1,
+        word: word,
+        index: index
+      });
+      currentPos += word.length;
+    });
+    return positions;
+  };
+
+  const handleKeyPress = (key) => {
+    if (gameWon || gameLost) return;
+
+    if (key === 'ENTER') {
+      // Allow guesses of at least 3 letters (or exact match)
+      if (currentGuess.length >= 3) {
+        submitGuess();
+      }
+    } else if (key === 'BACKSPACE') {
+      setCurrentGuess(currentGuess.slice(0, -1));
+    } else if (currentGuess.length < currentWord.word.length && /^[A-Z]$/.test(key)) {
+      setCurrentGuess(currentGuess + key);
+    }
+  };
+
+  const submitGuess = () => {
+    const newGuesses = [...guesses, currentGuess];
+    setGuesses(newGuesses);
+
+    // Update used letters
+    const newUsedLetters = { ...usedLetters };
+    for (let i = 0; i < currentGuess.length; i++) {
+      const letter = currentGuess[i];
+      const status = getLetterStatus(currentGuess, i);
+      if (!newUsedLetters[letter] || status === 'correct') {
+        newUsedLetters[letter] = status;
+      } else if (status === 'present' && newUsedLetters[letter] !== 'correct') {
+        newUsedLetters[letter] = status;
+      }
+    }
+    setUsedLetters(newUsedLetters);
+
+    if (currentGuess === currentWord.word) {
+      const timeTaken = Date.now() - startTime;
+      setEndTime(timeTaken);
+      setGameWon(true);
+      setShowDefinition(true); // Automatically show definition on win
+      
+      // Update user statistics
+      const updatedUser = { ...currentUser };
+      updatedUser.gamesPlayed += 1;
+      updatedUser.gamesWon += 1;
+      updatedUser.totalTime += timeTaken;
+      updatedUser.speeds.push(timeTaken);
+      updatedUser.averageTime = Math.floor(updatedUser.totalTime / updatedUser.gamesWon);
+      if (!updatedUser.bestTime || timeTaken < updatedUser.bestTime) {
+        updatedUser.bestTime = timeTaken;
+      }
+      
+      // Track definition usage statistics
+      if (definitionViewedThisGame) {
+        updatedUser.definitionUsedBeforeWin += 1;
+      }
+      if (lastActionWasDefinition) {
+        updatedUser.wonImmediatelyAfterDefinition += 1;
+      }
+      
+      setCurrentUser(updatedUser);
+      saveUserData(updatedUser);
+      localStorage.setItem('lettermaps_current_user', JSON.stringify(updatedUser));
+    } else if (newGuesses.length >= maxGuesses) {
+      const timeTaken = Date.now() - startTime;
+      setEndTime(timeTaken);
+      setGameLost(true);
+      setShowDefinition(true); // Also show definition on loss
+      
+      // Update user statistics (game played but not won)
+      const updatedUser = { ...currentUser };
+      updatedUser.gamesPlayed += 1;
+      
+      setCurrentUser(updatedUser);
+      saveUserData(updatedUser);
+      localStorage.setItem('lettermaps_current_user', JSON.stringify(updatedUser));
+    }
+
+    setCurrentGuess('');
+    setLastActionWasDefinition(false); // Reset after each guess
+  };
+
+  const getLetterStatus = (guess, index) => {
+    const letter = guess[index];
+    if (letter === currentWord.word[index]) {
+      return 'correct';
+    } else if (currentWord.word.includes(letter)) {
+      return 'present';
+    }
+    return 'absent';
+  };
+
+  const renderGuessRow = (guess, rowIndex) => {
+    if (!currentWord) return null;
+    
+    const isCurrentRow = rowIndex === guesses.length && !gameWon && !gameLost;
+    const displayGuess = isCurrentRow ? currentGuess : (guess || '');
+    const wordBoundaries = getWordBoundaries();
+    const wordPositions = getWordPositions();
+    
+    return (
+      <div key={rowIndex} className="flex gap-1 justify-center mb-1">
+        {Array.from({ length: currentWord.word.length }).map((_, i) => {
+          // Check if this position is in a revealed word
+          const revealedWordIndex = wordPositions.findIndex(pos => 
+            revealedWords.includes(pos.index) && i >= pos.start && i <= pos.end
+          );
+          const isRevealed = revealedWordIndex !== -1;
+          
+          let letter = displayGuess[i] || '';
+          
+          // If this position is revealed, show the actual letter
+          if (isRevealed && !guess && !isCurrentRow) {
+            letter = currentWord.word[i];
+          }
+          
+          let bgColor = 'bg-white border-2 border-blue-200';
+          
+          // Revealed words always show as green
+          if (isRevealed && !isCurrentRow) {
+            bgColor = 'bg-green-400 border-green-500 text-white';
+            letter = currentWord.word[i];
+          }
+          // Only show feedback for letters that were actually guessed
+          else if (guess && !isCurrentRow && i < guess.length) {
+            const status = getLetterStatus(guess, i);
+            if (status === 'correct') {
+              bgColor = 'bg-green-400 border-green-500 text-white';
+            } else if (status === 'present') {
+              bgColor = 'bg-yellow-300 border-yellow-400 text-gray-800';
+            } else {
+              bgColor = 'bg-gray-300 border-gray-400 text-gray-600';
+            }
+          } else if (isCurrentRow && letter) {
+            bgColor = 'bg-blue-100 border-blue-300';
+          }
+          
+          // Add extra margin after word boundaries (after the last letter of each word)
+          const extraMargin = wordBoundaries.includes(i + 1) ? 'mr-3' : '';
+          
+          return (
+            <div
+              key={i}
+              className={`w-12 h-12 flex items-center justify-center text-2xl font-bold rounded ${bgColor} ${extraMargin} transition-all duration-300`}
+            >
+              {letter}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const keyboard = [
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+    ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BACKSPACE']
+  ];
+
+  const getKeyColor = (key) => {
+    if (key === 'ENTER' || key === 'BACKSPACE') return 'bg-blue-400 hover:bg-blue-500 text-white';
+    if (!usedLetters[key]) return 'bg-blue-100 hover:bg-blue-200 text-gray-800';
+    if (usedLetters[key] === 'correct') return 'bg-green-400 text-white';
+    if (usedLetters[key] === 'present') return 'bg-yellow-300 text-gray-800';
+    return 'bg-gray-400 text-gray-600';
+  };
+
+  // Login Screen
+  if (showLogin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
+          <div className="text-center mb-8">
+            <BookOpen className="w-16 h-16 mx-auto text-blue-600 mb-4" />
+            <h1 className="text-4xl font-bold text-blue-800 mb-2" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
+              LetterMaps
+            </h1>
+            <p className="text-blue-600">Geography Spelling Game</p>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-blue-700 mb-2">
+                Enter Username
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toUpperCase())}
+                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                placeholder="YOUR NAME"
+                className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:border-blue-400 focus:outline-none text-lg font-bold"
+                style={{ fontFamily: 'Comic Sans MS, cursive' }}
+                maxLength={20}
+              />
+            </div>
+            
+            {loginError && (
+              <div className="bg-red-50 border-2 border-red-300 rounded-xl p-3 text-red-700 text-sm">
+                {loginError}
+              </div>
+            )}
+            
+            <button
+              onClick={handleLogin}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-bold text-lg transition-colors flex items-center justify-center gap-2"
+              style={{ fontFamily: 'Comic Sans MS, cursive' }}
+            >
+              <User className="w-5 h-5" />
+              Start Playing
+            </button>
+            
+            <div className="bg-blue-50 rounded-xl p-4 text-sm text-blue-700">
+              <p className="font-semibold mb-1">📝 Note:</p>
+              <p>Your username will be saved. Return anytime to see your stats!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentWord) return <div className="min-h-screen bg-blue-50 flex items-center justify-center">Loading...</div>;
+
+  const topicColors = getTopicColors(currentWord.topic);
+
+  return (
+    <div className={`min-h-screen bg-gradient-to-br ${topicColors.gradient} p-4`}>
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-3xl shadow-lg p-6 mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <BookOpen className="w-8 h-8 text-blue-600" />
+              <div>
+                <h1 className="text-3xl font-bold text-blue-800" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
+                  LetterMaps
+                </h1>
+                <p className="text-sm text-blue-600">Playing as: {currentUser.username}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowInstructions(!showInstructions)}
+                className="p-2 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
+              >
+                <HelpCircle className="w-6 h-6 text-blue-600" />
+              </button>
+              <button
+                onClick={handleLogout}
+                className="p-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-6 h-6 text-red-600" />
+              </button>
+            </div>
+          </div>
+
+          {/* User Stats */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <div className="bg-blue-50 rounded-lg p-3 text-center">
+              <Trophy className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+              <div className="text-2xl font-bold text-blue-800">{currentUser.gamesWon}</div>
+              <div className="text-xs text-blue-600">Wins</div>
+            </div>
+            <div className="bg-green-50 rounded-lg p-3 text-center">
+              <Award className="w-5 h-5 text-green-600 mx-auto mb-1" />
+              <div className="text-2xl font-bold text-green-800">{currentUser.gamesPlayed}</div>
+              <div className="text-xs text-green-600">Played</div>
+            </div>
+            <div className="bg-purple-50 rounded-lg p-3 text-center">
+              <Clock className="w-5 h-5 text-purple-600 mx-auto mb-1" />
+              <div className="text-lg font-bold text-purple-800">
+                {currentUser.averageTime ? formatTime(currentUser.averageTime) : '-'}
+              </div>
+              <div className="text-xs text-purple-600">Avg Time</div>
+            </div>
+            <div className="bg-orange-50 rounded-lg p-3 text-center">
+              <Clock className="w-5 h-5 text-orange-600 mx-auto mb-1" />
+              <div className="text-lg font-bold text-orange-800">
+                {currentUser.bestTime ? formatTime(currentUser.bestTime) : '-'}
+              </div>
+              <div className="text-xs text-orange-600">Best Time</div>
+            </div>
+            <div className="bg-yellow-50 rounded-lg p-3 text-center">
+              <Lightbulb className="w-5 h-5 text-yellow-600 mx-auto mb-1" />
+              <div className="text-lg font-bold text-yellow-800">
+                {currentUser.gamesWon > 0 ? Math.round((currentUser.definitionUsedBeforeWin / currentUser.gamesWon) * 100) : 0}%
+              </div>
+              <div className="text-xs text-yellow-600">Used Hint</div>
+            </div>
+            <div className="bg-pink-50 rounded-lg p-3 text-center">
+              <Lightbulb className="w-5 h-5 text-pink-600 mx-auto mb-1" />
+              <div className="text-lg font-bold text-pink-800">
+                {currentUser.definitionUsedBeforeWin > 0 ? Math.round((currentUser.wonImmediatelyAfterDefinition / currentUser.definitionUsedBeforeWin) * 100) : 0}%
+              </div>
+              <div className="text-xs text-pink-600">Won After</div>
+            </div>
+          </div>
+          
+          {showInstructions && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-xl space-y-4">
+              <div>
+                <h3 className="font-bold text-blue-800 mb-2">How to Play:</h3>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>🟢 <strong>Green</strong> = Correct letter in correct position</li>
+                  <li>🟡 <strong>Yellow</strong> = Correct letter in wrong position</li>
+                  <li>⚪ <strong>Gray</strong> = Letter not in word</li>
+                  <li>✏️ <strong>Shorter guesses OK!</strong> = Try 3+ letter words to gain clues</li>
+                  <li>💡 <strong>Hint Button</strong> = See the definition (unlocks after 2 guesses)</li>
+                  <li>🆘 <strong>Reveal Word</strong> = Shows one word in green (unlocks after 3 guesses)</li>
+                  <li>⏱️ <strong>Speed matters</strong> = Solve faster to improve your stats!</li>
+                  <li>✨ <strong>Auto-help</strong> = Long multi-word answers start with one word revealed!</li>
+                </ul>
+              </div>
+
+              <div className="border-t-2 border-blue-200 pt-3">
+                <h3 className="font-bold text-blue-800 mb-2">📊 Your Statistics:</h3>
+                <div className="text-sm text-blue-700 space-y-2 bg-white p-3 rounded-lg">
+                  <ul className="list-disc list-inside space-y-1">
+                    <li><strong>Wins</strong> - Total games won</li>
+                    <li><strong>Played</strong> - Total games attempted</li>
+                    <li><strong>Avg Time</strong> - Average completion time for wins</li>
+                    <li><strong>Best Time</strong> - Your fastest solve</li>
+                    <li><strong>Used Hint</strong> - % of wins where you viewed the definition</li>
+                    <li><strong>Won After</strong> - % of times you won immediately after viewing the definition</li>
+                  </ul>
+                  <p className="mt-2 text-xs italic">These stats help you track your learning strategy!</p>
+                  <p className="mt-1 text-xs"><strong>Note:</strong> Word reveals (auto or manual) don't affect your statistics - they're just there to help with really tough terms!</p>
+                </div>
+              </div>
+
+              <div className="border-t-2 border-blue-200 pt-3">
+                <h3 className="font-bold text-blue-800 mb-2">🎨 Topic Colors:</h3>
+                <div className="text-sm text-blue-700 space-y-2 bg-white p-3 rounded-lg">
+                  <p className="mb-2">The background color changes based on the geography topic:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-4 h-4 rounded-full bg-cyan-600"></span>
+                      <span>Cyan = Water & Security</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-4 h-4 rounded-full bg-green-600"></span>
+                      <span>Green = Carbon & Energy</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-4 h-4 rounded-full bg-pink-600"></span>
+                      <span>Pink = Health & Rights</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-4 h-4 rounded-full bg-purple-500"></span>
+                      <span>Purple = Globalisation</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-4 h-4 rounded-full bg-blue-600"></span>
+                      <span>Blue = Superpowers</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t-2 border-blue-200 pt-3">
+                <h3 className="font-bold text-blue-800 mb-2">📝 Letter Input Guide:</h3>
+                <div className="text-sm text-blue-700 space-y-2 bg-white p-3 rounded-lg">
+                  <p><strong>Typing Your Guess:</strong></p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>Type letters using your keyboard or click the on-screen buttons</li>
+                    <li>You can guess words from 3 letters up to the full word length</li>
+                    <li>Press ENTER or click ENTER button to submit your guess</li>
+                    <li>Press BACKSPACE or click ← to delete letters</li>
+                    <li>Use 6 attempts to solve the word</li>
+                    <li><strong>Multi-word answers</strong> show word count and have gaps between words</li>
+                  </ul>
+                  <p className="mt-2"><strong>Strategy Tip:</strong> Try common short words first (like "CARBON", "ENERGY", "GLOBAL") to reveal which letters are in the word, then piece together the full term!</p>
+                </div>
+              </div>
+
+              <div className="border-t-2 border-blue-200 pt-3">
+                <h3 className="font-bold text-blue-800 mb-2">💡 Definition Button Guide:</h3>
+                <div className="text-sm text-blue-700 space-y-2 bg-white p-3 rounded-lg">
+                  <p><strong>How It Works:</strong></p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li><strong>Locked:</strong> Button is gray and disabled until you make 2 guesses</li>
+                    <li><strong>Unlocked:</strong> After 2 guesses, button turns yellow and becomes clickable</li>
+                    <li><strong>Click to reveal:</strong> Shows the geography definition of the term</li>
+                    <li><strong>Click to hide:</strong> Hides the definition if you want to try without it</li>
+                    <li><strong>Auto-shown:</strong> Definition automatically appears when you win or lose</li>
+                  </ul>
+                  <p className="mt-2"><strong>Learning Tip:</strong> The definition helps you understand what the term means, making it easier to guess the spelling and remember it for your studies!</p>
+                </div>
+              </div>
+
+              <div className="border-t-2 border-blue-200 pt-3">
+                <h3 className="font-bold text-blue-800 mb-2">🆘 Word Reveal Help:</h3>
+                <div className="text-sm text-blue-700 space-y-2 bg-white p-3 rounded-lg">
+                  <p><strong>How It Works:</strong></p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li><strong>Auto-reveal:</strong> If the answer has multiple words AND any word is longer than 6 letters, the first word is automatically revealed in green</li>
+                    <li><strong>"Reveal Word" button:</strong> Unlocks after 3 guesses for multi-word answers</li>
+                    <li><strong>Click to reveal:</strong> Shows the next unrevealed word in green boxes</li>
+                    <li><strong>One at a time:</strong> Each click reveals one more word</li>
+                    <li><strong>Still educational:</strong> You still need to figure out the remaining words!</li>
+                  </ul>
+                  <p className="mt-2"><strong>Example:</strong> "CARBON CAPTURE AND STORAGE" might start with "CARBON" revealed, then you can unlock "CAPTURE" after 3 guesses!</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Game Board */}
+        <div className="bg-white rounded-3xl shadow-lg p-6 mb-4">
+          <div className="mb-4 text-center">
+            <div className="mb-3">
+              <span className={`inline-block px-4 py-2 rounded-full font-bold text-sm ${topicColors.badge}`} style={{ fontFamily: 'Comic Sans MS, cursive' }}>
+                📚 {currentWord.topic}
+              </span>
+            </div>
+            <p className="text-blue-600 font-semibold" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
+              {currentWord.word.length} letter{currentWord.word.length !== 1 ? 's' : ''}
+              {getWordCount() > 1 && <span> • {getWordCount()} words</span>}
+            </p>
+            {revealedWords.length > 0 && !gameWon && !gameLost && (
+              <p className="text-xs text-green-600 mt-1 font-semibold">
+                ✨ {revealedWords.length} word{revealedWords.length !== 1 ? 's' : ''} revealed to help!
+              </p>
+            )}
+            <p className="text-xs text-blue-400 mt-1">
+              💡 Tip: Try shorter words (3+ letters) to gain clues!
+            </p>
+            {!gameWon && !gameLost && startTime && (
+              <p className="text-sm text-gray-500 mt-1">
+                ⏱️ {formatTime(Date.now() - startTime)}
+              </p>
+            )}
+          </div>
+
+          <div className="mb-6">
+            {Array.from({ length: maxGuesses }).map((_, i) => renderGuessRow(guesses[i], i))}
+          </div>
+
+          {/* Definition Hint Button - Only shown during active gameplay */}
+          {!gameWon && !gameLost && (
+            <>
+              <div className="mb-4 flex gap-3 justify-center items-center">
+                {/* Definition Button */}
+                <button
+                  onClick={() => {
+                    if (guesses.length >= 2) {
+                      setShowDefinition(!showDefinition);
+                      if (!showDefinition) {
+                        // Only track if we're showing it (not hiding)
+                        setDefinitionViewedThisGame(true);
+                        setLastActionWasDefinition(true);
+                      }
+                    }
+                  }}
+                  disabled={guesses.length < 2}
+                  className={`px-6 py-2 rounded-xl font-bold transition-colors flex items-center gap-2 ${
+                    guesses.length >= 2 
+                      ? 'bg-yellow-400 hover:bg-yellow-500 text-gray-800 cursor-pointer' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                  style={{ fontFamily: 'Comic Sans MS, cursive' }}
+                  title={guesses.length < 2 ? 'Make 2 guesses first!' : ''}
+                >
+                  <Lightbulb className="w-5 h-5" />
+                  {showDefinition ? 'Hide' : 'Show'} Definition
+                  {guesses.length < 2 && (
+                    <span className="text-xs ml-1">({2 - guesses.length} more)</span>
+                  )}
+                </button>
+
+                {/* Word Reveal Button - Only show if there are unrevealed words */}
+                {getWordCount() > 1 && revealedWords.length < getWordCount() && (
+                  <button
+                    onClick={() => {
+                      if (guesses.length >= 3) {
+                        // Reveal the next unrevealed word
+                        const wordPositions = getWordPositions();
+                        const nextUnrevealedIndex = wordPositions.findIndex(pos => !revealedWords.includes(pos.index));
+                        if (nextUnrevealedIndex !== -1) {
+                          setRevealedWords([...revealedWords, wordPositions[nextUnrevealedIndex].index]);
+                          setHelpUsedThisGame(true);
+                        }
+                      }
+                    }}
+                    disabled={guesses.length < 3}
+                    className={`px-6 py-2 rounded-xl font-bold transition-colors flex items-center gap-2 ${
+                      guesses.length >= 3 
+                        ? 'bg-orange-400 hover:bg-orange-500 text-white cursor-pointer' 
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                    style={{ fontFamily: 'Comic Sans MS, cursive' }}
+                    title={guesses.length < 3 ? 'Make 3 guesses first!' : 'Reveal one word'}
+                  >
+                    <HelpCircle className="w-5 h-5" />
+                    Reveal Word
+                    {guesses.length < 3 && (
+                      <span className="text-xs ml-1">({3 - guesses.length} more)</span>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Definition Popup */}
+              {showDefinition && (
+                <div className="mb-4 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-xl">
+                  <p className="text-sm text-gray-700 italic">
+                    💡 <strong>Hint:</strong> {currentWord.definition}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Win/Loss Message - Keep game board visible above */}
+          {(gameWon || gameLost) && (
+            <div className={`p-6 rounded-2xl ${gameWon ? 'bg-green-50 border-2 border-green-300' : 'bg-red-50 border-2 border-red-300'}`}>
+              <h2 className="text-2xl font-bold mb-3 text-center" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
+                {gameWon ? '🎉 Correct!' : '😕 Not Quite!'}
+              </h2>
+              <div className="mb-3 text-center">
+                <span className={`inline-block px-3 py-1 rounded-full font-bold text-xs ${topicColors.badge}`} style={{ fontFamily: 'Comic Sans MS, cursive' }}>
+                  {currentWord.topic}
+                </span>
+              </div>
+              
+              {gameWon && endTime && (
+                <p className="text-lg text-green-700 mb-4 text-center font-bold">
+                  ⏱️ Completed in: {formatTime(endTime)}
+                </p>
+              )}
+
+              {/* Show all previous guesses */}
+              {guesses.length > 0 && (
+                <div className="mb-4 bg-white rounded-lg p-4">
+                  <p className="text-sm text-gray-600 mb-2 font-semibold text-center">Your Guesses:</p>
+                  <div className="flex flex-col gap-2">
+                    {guesses.map((guess, index) => (
+                      <div key={index} className="flex items-center justify-center gap-2">
+                        <span className="text-xs text-gray-500 font-bold w-8">#{index + 1}</span>
+                        <div className="flex gap-1">
+                          {Array.from({ length: guess.length }).map((_, i) => {
+                            const letter = guess[i];
+                            const wordBoundaries = getWordBoundaries();
+                            const wordPositions = getWordPositions();
+                            
+                            // Check if this position is in a revealed word
+                            const revealedWordIndex = wordPositions.findIndex(pos => 
+                              revealedWords.includes(pos.index) && i >= pos.start && i <= pos.end
+                            );
+                            const isRevealed = revealedWordIndex !== -1;
+                            
+                            let bgColor = 'bg-gray-300 border-gray-400 text-gray-600';
+                            
+                            if (i < currentWord.word.length) {
+                              const status = getLetterStatus(guess, i);
+                              if (status === 'correct' || isRevealed) {
+                                bgColor = 'bg-green-400 border-green-500 text-white';
+                              } else if (status === 'present') {
+                                bgColor = 'bg-yellow-300 border-yellow-400 text-gray-800';
+                              }
+                            }
+                            
+                            const extraMargin = wordBoundaries.includes(i + 1) ? 'mr-2' : '';
+                            
+                            return (
+                              <div
+                                key={i}
+                                className={`w-8 h-8 flex items-center justify-center text-sm font-bold rounded border-2 ${bgColor} ${extraMargin}`}
+                              >
+                                {letter}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Show answer in green boxes only if game was lost */}
+              {gameLost && (
+                <div className="mb-4 bg-white rounded-lg p-4">
+                  <p className="text-sm text-gray-600 mb-2 font-semibold text-center">The answer was:</p>
+                  <div className="flex gap-1 justify-center mb-3">
+                    {Array.from({ length: currentWord.word.length }).map((_, i) => {
+                      const letter = currentWord.word[i];
+                      const wordBoundaries = getWordBoundaries();
+                      const extraMargin = wordBoundaries.includes(i + 1) ? 'mr-3' : '';
+                      
+                      return (
+                        <div
+                          key={i}
+                          className={`w-12 h-12 flex items-center justify-center text-2xl font-bold rounded bg-green-400 border-green-500 text-white ${extraMargin}`}
+                        >
+                          {letter}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xl font-bold text-blue-800 text-center">
+                    {currentWord.display || currentWord.word}
+                  </p>
+                </div>
+              )}
+
+              {/* Definition automatically shown */}
+              <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 mb-4">
+                <p className="text-sm font-semibold text-gray-700 mb-2 text-center">📖 Definition:</p>
+                <p className="text-gray-700 text-center">
+                  <span className="font-bold">{currentWord.display || currentWord.word}:</span> {currentWord.definition}
+                </p>
+              </div>
+
+              <div className="text-center">
+                <button
+                  onClick={selectNewWord}
+                  className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-xl font-bold transition-colors text-lg shadow-lg"
+                  style={{ fontFamily: 'Comic Sans MS, cursive' }}
+                >
+                  <RotateCcw className="w-6 h-6" />
+                  Next Word
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Keyboard */}
+        {!gameWon && !gameLost && (
+          <div className="bg-white rounded-3xl shadow-lg p-4">
+            {keyboard.map((row, i) => (
+              <div key={i} className="flex gap-1 justify-center mb-1">
+                {row.map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => handleKeyPress(key)}
+                    className={`${
+                      key === 'ENTER' || key === 'BACKSPACE' ? 'px-3' : 'w-10'
+                    } h-14 rounded-lg font-bold text-sm transition-all ${getKeyColor(key)}`}
+                    style={{ fontFamily: 'Comic Sans MS, cursive' }}
+                  >
+                    {key === 'BACKSPACE' ? '←' : key}
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<LetterMaps />);
+    </script>
+</body>
+</html>
